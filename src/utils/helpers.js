@@ -272,17 +272,19 @@ export default {
 	updateUriOfAllActiveFiles(oldUrl, newUrl) {
 		const files = editorManager.files;
 		const { url } = Url.parse(oldUrl);
+		const base = url.endsWith("/") ? url.slice(0, -1) : url;
 
 		for (let file of files) {
 			if (!file.uri) continue;
 			const fileUrl = Url.parse(file.uri).url;
-			if (new RegExp("^" + escapeStringRegexp(url)).test(fileUrl)) {
-				if (newUrl) {
-					file.uri = Url.join(newUrl, file.filename);
-				} else {
-					file.uri = null;
-				}
+			if (!Url.isSameOrDescendant(fileUrl, base)) continue;
+			if (!newUrl) {
+				file.uri = null;
+				continue;
 			}
+			// Keep the file's path relative to the renamed folder.
+			const relative = fileUrl.slice(base.length + 1);
+			file.uri = relative ? Url.join(newUrl, relative) : newUrl;
 		}
 
 		editorManager.onupdate("file-delete");
