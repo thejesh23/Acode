@@ -414,7 +414,7 @@ async function resolveDepsManifest(deps) {
 			const manifests = await resolveDepsManifest(
 				remoteDependency.dependencies,
 			);
-			resolved.push(manifests);
+			resolved.push(...manifests);
 		}
 
 		resolved.push(remoteDependency);
